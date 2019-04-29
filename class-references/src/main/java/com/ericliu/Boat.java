@@ -1,4 +1,4 @@
-package main.java.com.ericliu;
+package com.ericliu;
 
 public interface Boat {
 }
