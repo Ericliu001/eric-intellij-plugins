@@ -1,12 +1,13 @@
-package com.ericliu;
+package com.ericliu.migrator;
 
+import com.ericliu.Boat;
+import com.ericliu.Ship;
+import com.ericliu.Vehicle;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.project.Project;
-import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiElementFactory;
 import com.intellij.psi.PsiJavaCodeReferenceElement;
 import com.intellij.psi.PsiReferenceList;
 import com.intellij.psi.search.GlobalSearchScope;
@@ -15,26 +16,21 @@ import com.intellij.psi.search.searches.DirectClassInheritorsSearch;
 /**
  * This migrator replaces Boat interface implementation with Ship interface.
  */
-class InterfaceMigrator {
-
-    private final Project project;
-    private final JavaPsiFacade javaPsiFacade;
-    private final PsiElementFactory psiElementFactory;
+public class InterfaceMigrator extends MigratorBase {
 
     private final PsiClass boatClass;
     private final PsiClass shipClass;
     private final PsiClass vehicleClass;
 
-    InterfaceMigrator(final Project project) {
-        this.project = project;
-        javaPsiFacade = JavaPsiFacade.getInstance(project);
-        psiElementFactory = PsiElementFactory.SERVICE.getInstance(project);
+    public InterfaceMigrator(final Project project) {
+        super(project);
         boatClass = toPsiClass(Boat.class);
         shipClass = toPsiClass(Ship.class);
         vehicleClass = toPsiClass(Vehicle.class);
     }
 
-    void migrate() {
+    @Override
+    public void migrate() {
         Notifications.Bus.notify(new Notification(InterfaceMigrator.class.getName(),
                 "Migration started.",
                 "Project: " + project.getName(),
@@ -83,9 +79,5 @@ class InterfaceMigrator {
                 referenceElement.delete();
             }
         }
-    }
-
-    private PsiClass toPsiClass(Class<?> clazz) {
-        return javaPsiFacade.findClass(clazz.getName(), GlobalSearchScope.allScope(project));
     }
 }

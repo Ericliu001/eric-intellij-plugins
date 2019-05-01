@@ -1,4 +1,4 @@
-package com.ericliu;
+package com.ericliu.action;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
