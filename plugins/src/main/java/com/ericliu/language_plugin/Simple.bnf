@@ -1,0 +1,28 @@
+{
+  parserClass="com.ericliu.language_plugin.parser.SimpleParser"
+
+  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+  psiClassPrefix="Simple"
+  psiImplClassSuffix="Impl"
+  psiPackage="com.ericliu.language_plugin.psi"
+  psiImplPackage="com.ericliu.language_plugin.psi.impl"
+
+  elementTypeHolderClass="com.ericliu.language_plugin.psi.SimpleTypes"
+  elementTypeClass="com.ericliu.language_plugin.psi.SimpleElementType"
+  tokenTypeClass="com.ericliu.language_plugin.psi.SimpleTokenType"
+
+  psiImplUtilClass="com.ericliu.language_plugin.psi.impl.SimplePsiImplUtil"
+}
+
+simpleFile ::= (property|COMMENT)*
+
+property ::= (KEY SEPARATOR VALUE?)|KEY {
+    pin=3
+    recoverWhile="recover_property"
+    mixin="com.ericliu.language_plugin.psi.impl.SimpleNamedElementImpl"
+    implements="com.ericliu.language_plugin.psi.SimpleNamedElement"
+    methods=[getKey getValue getName setName getNameIdentifier getPresentation]
+}
+
+private recover_property ::= !(KEY|SEPARATOR|COMMENT)
