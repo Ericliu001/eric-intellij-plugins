@@ -1,7 +1,6 @@
 package com.ericliu.migrator;
 
 import com.ericliu.SmallBoat;
-import com.ericliu.SteamBoat;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
@@ -17,18 +16,14 @@ import java.util.Set;
 
 public class ParentClassMigrator extends MigratorBase {
 
-    private final PsiClass steamBoatClass;
-    private final PsiClass smallBoatClass;
+    private final PsiClass smallBoatClass = toPsiClass(SmallBoat.class);
 
-    private final Set<PsiClass> targetSet;
+    private final Set<String> targetSet;
 
     public ParentClassMigrator(final Project project) {
         super(project);
         targetSet = new HashSet<>();
-        steamBoatClass = toPsiClass(SteamBoat.class);
-        smallBoatClass = toPsiClass(SmallBoat.class);
-
-        targetSet.add(steamBoatClass);
+        targetSet.add("com.ericliu.SteamBoat");
     }
 
     /**
@@ -36,17 +31,18 @@ public class ParentClassMigrator extends MigratorBase {
      */
     @Override
     public void migrate() {
-        Notifications.Bus.notify(new Notification(InterfaceMigrator.class.getName(),
-                "Add Parent class.",
-                smallBoatClass.getName(),
-                NotificationType.INFORMATION));
 
         for (final PsiClass currentClass : AllClassesSearch.
                 search(GlobalSearchScope.allScope(project), project)) {
 
-            if (targetSet.contains(currentClass)) {
+            if (targetSet.contains(currentClass.getQualifiedName())) {
 
-                addParentClass(smallBoatClass, steamBoatClass.getExtendsList());
+                addParentClass(smallBoatClass, currentClass.getExtendsList());
+
+                Notifications.Bus.notify(new Notification(InterfaceMigrator.class.getName(),
+                        "Add Parent class " + smallBoatClass.getName() + " to ",
+                        currentClass.getQualifiedName(),
+                        NotificationType.INFORMATION));
             }
         }
     }
@@ -55,7 +51,7 @@ public class ParentClassMigrator extends MigratorBase {
 
         for (final PsiJavaCodeReferenceElement referenceElement : extendsList.getReferenceElements()) {
 
-            if (referenceElement.getQualifiedName().equals(targetClass)) {
+            if (referenceElement.getQualifiedName().equals(targetClass.getQualifiedName())) {
                 referenceElement.delete();
             }
         }
@@ -68,10 +64,5 @@ public class ParentClassMigrator extends MigratorBase {
 
     private void addParentClass(final PsiClass targetClass, final PsiReferenceList extendsList) {
         extendsList.add(psiElementFactory.createClassReferenceElement(targetClass));
-
-        Notifications.Bus.notify(new Notification(InterfaceMigrator.class.getName(),
-                "Adding",
-                "Parent Class name: " + targetClass.getName(),
-                NotificationType.INFORMATION));
     }
 }
